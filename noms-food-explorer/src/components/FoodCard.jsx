@@ -31,12 +31,20 @@ function FoodCard({ food, onSelect }) {
         />
       )}
 
-      <CardContent sx={{ flexGrow: 1 }}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Typography
           variant="h6"
           component="h2"
+          fontWeight={700}
           sx={{
-            fontWeight: 700,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
             mb: 1,
           }}
         >
@@ -47,7 +55,9 @@ function FoodCard({ food, onSelect }) {
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mb: 2 }}
+            sx={{
+              mb: 2,
+            }}
           >
             {food.brandName}
           </Typography>
@@ -56,8 +66,8 @@ function FoodCard({ food, onSelect }) {
         <Stack
           direction="row"
           spacing={1}
-          flexWrap="wrap"
           useFlexGap
+          flexWrap="wrap"
         >
           <Chip
             label={`${food.calories ?? "—"} kcal`}
@@ -76,7 +86,12 @@ function FoodCard({ food, onSelect }) {
         </Stack>
       </CardContent>
 
-      <CardActions sx={{ p: 2, pt: 0 }}>
+      <CardActions
+        sx={{
+          p: 2,
+          pt: 0,
+        }}
+      >
         <Button
           fullWidth
           variant="outlined"
