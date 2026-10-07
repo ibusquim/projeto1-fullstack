@@ -1,7 +1,9 @@
 import {
   Alert,
+  Box,
   Button,
   Stack,
+  Typography,
 } from "@mui/material";
 
 function ErrorMessage({
@@ -9,23 +11,35 @@ function ErrorMessage({
   onRetry,
 }) {
   return (
-    <Stack spacing={2}>
-      <Alert severity="error">
-        {message}
-      </Alert>
+    <Box
+      sx={{
+        width: "100%",
+        py: 4,
+      }}
+    >
+      <Stack spacing={2}>
+        <Alert severity="error">
+          <Typography variant="body2">
+            {message}
+          </Typography>
+        </Alert>
 
-      {onRetry && (
-        <Button
-          variant="outlined"
-          onClick={onRetry}
-          sx={{
-            alignSelf: "flex-start",
-          }}
-        >
-          Tentar novamente
-        </Button>
-      )}
-    </Stack>
+        {onRetry && (
+          <Button
+            variant="outlined"
+            onClick={onRetry}
+            sx={{
+              alignSelf: {
+                xs: "stretch",
+                sm: "flex-start",
+              },
+            }}
+          >
+            Tentar novamente
+          </Button>
+        )}
+      </Stack>
+    </Box>
   );
 }
 

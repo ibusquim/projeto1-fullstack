@@ -11,6 +11,8 @@ import {
 import SearchBar from "./components/SearchBar";
 import FoodCard from "./components/FoodCard";
 import FoodDetails from "./components/FoodDetails";
+import Loading from "./components/Loading";
+import ErrorMessage from "./components/ErrorMessage";
 
 const mockFoods = [
   {
@@ -157,21 +159,23 @@ function handleCloseDetails() {
             onChange={setQuery}
             onSearch={handleSearch}
           />
-        </Paper>
+         </Paper>
 
           <Box
           component="section"
           sx={{
             mt: 5,
           }}
-        >
+         >
           <Typography
             variant="h5"
             component="h2"
             fontWeight={700}
             gutterBottom
-          >
+          > 
+
             Resultados
+            
           </Typography>
 
           <Divider sx={{ mb: 3 }} />
@@ -186,13 +190,13 @@ function handleCloseDetails() {
     },
     gap: 3,
   }}
->
+ >
   {mockFoods.map((food) => (
     <FoodCard
   key={food.id}
   food={food}
   onSelect={handleSelectFood}
-/>
+ />
   ))}
 </Box>
 
