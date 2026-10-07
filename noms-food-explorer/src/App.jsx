@@ -40,6 +40,10 @@ function App() {
     });
   }, [foods]);
 
+  function handleSelectFood(food) {
+    setSelectedFood(food);
+  }
+
   async function handleSearch() {
     if (!query.trim()) {
       setFoods([]);
@@ -156,7 +160,7 @@ function App() {
               )}
 
               <button
-                onClick={() => setSelectedFood(food)}
+                onClick={() => handleSelectFood(food)}
               >
                 Selecionar
               </button>
