@@ -9,32 +9,20 @@ import {
   Typography,
 } from "@mui/material";
 
-function NutrientItem({ label, value, unit = "" }) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
-        py: 1.5,
-      }}
-    >
-      <Typography color="text.secondary">
-        {label}
-      </Typography>
-
-      <Typography fontWeight={600}>
-        {value ?? "—"} {unit}
-      </Typography>
-    </Box>
-  );
-}
-
-function FoodDetails({ open, food, onClose }) {
+function FoodDetails({
+  open,
+  food,
+  onClose,
+}) {
   if (!food) {
     return null;
   }
+
+  const nutrients = Array.isArray(food.nutrients)
+    ? food.nutrients
+    : [];
+
+  const serving = food.serving;
 
   return (
     <Dialog
@@ -43,12 +31,8 @@ function FoodDetails({ open, food, onClose }) {
       fullWidth
       maxWidth="sm"
     >
-      <DialogTitle
-        sx={{
-          pr: 6,
-        }}
-      >
-        Informações nutricionais
+      <DialogTitle sx={{ pr: 6 }}>
+        Informações do alimento
 
         <IconButton
           aria-label="Fechar"
@@ -74,9 +58,75 @@ function FoodDetails({ open, food, onClose }) {
               {food.name}
             </Typography>
 
-            {food.brandName && (
+            <Typography color="text.secondary">
+              {food.brand}
+            </Typography>
+          </Box>
+
+          {food.description && (
+            <>
+              <Divider />
+
+              <Box>
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={700}
+                  gutterBottom
+                >
+                  Descrição
+                </Typography>
+
+                <Typography
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.7 }}
+                >
+                  {food.description}
+                </Typography>
+              </Box>
+            </>
+          )}
+
+          <Divider />
+
+          <Box>
+            <Typography
+              variant="subtitle1"
+              fontWeight={700}
+              gutterBottom
+            >
+              Porção padrão
+            </Typography>
+
+            {serving ? (
+              <Stack spacing={0.5}>
+                <Typography>
+                  Quantidade:{" "}
+                  {serving.quantity ?? "—"}{" "}
+                  {serving.unit ?? ""}
+                </Typography>
+
+                {serving.grams && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                    Equivalente: {serving.grams} g
+                  </Typography>
+                )}
+
+                {serving.milliliters && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                    Equivalente:{" "}
+                    {serving.milliliters} ml
+                  </Typography>
+                )}
+              </Stack>
+            ) : (
               <Typography color="text.secondary">
-                {food.brandName}
+                Porção não informada.
               </Typography>
             )}
           </Box>
@@ -84,46 +134,68 @@ function FoodDetails({ open, food, onClose }) {
           <Divider />
 
           <Box>
-            <NutrientItem
-              label="Calorias"
-              value={food.calories}
-              unit="kcal"
-            />
+            <Typography
+              variant="subtitle1"
+              fontWeight={700}
+              gutterBottom
+            >
+              Informações nutricionais
+            </Typography>
 
-            <NutrientItem
-              label="Proteínas"
-              value={food.protein}
-              unit="g"
-            />
+            {nutrients.length === 0 ? (
+              <Typography color="text.secondary">
+                Nenhuma informação nutricional disponível.
+              </Typography>
+            ) : (
+              nutrients.map((nutrient) => (
+                <Box
+                  key={nutrient.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 2,
+                    py: 1.25,
+                    borderBottom:
+                      "1px solid #eeeeee",
+                  }}
+                >
+                  <Typography color="text.secondary">
+                    {nutrient.name}
+                  </Typography>
 
-            <NutrientItem
-              label="Carboidratos"
-              value={food.carbohydrates}
-              unit="g"
-            />
-
-            <NutrientItem
-              label="Gorduras"
-              value={food.fat}
-              unit="g"
-            />
-
-            <NutrientItem
-              label="Fibras"
-              value={food.fiber}
-              unit="g"
-            />
+                  <Typography fontWeight={600}>
+                    {nutrient.value ?? "—"}
+                    {nutrient.unit
+                      ? ` ${nutrient.unit}`
+                      : ""}
+                  </Typography>
+                </Box>
+              ))
+            )}
           </Box>
 
           <Divider />
 
-          <Typography
-            variant="caption"
-            color="text.secondary"
-          >
-            Valores nutricionais conforme os dados
-            disponibilizados pela aplicação.
-          </Typography>
+          <Box>
+            {food.barcode && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Código de barras: {food.barcode}
+              </Typography>
+            )}
+
+            {food.basisUnit && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Unidade base: {food.basisUnit}
+              </Typography>
+            )}
+          </Box>
         </Stack>
       </DialogContent>
     </Dialog>
