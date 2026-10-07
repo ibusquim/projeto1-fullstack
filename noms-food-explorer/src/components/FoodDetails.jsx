@@ -15,6 +15,7 @@ function NutrientItem({ label, value, unit = "" }) {
       sx={{
         display: "flex",
         justifyContent: "space-between",
+        alignItems: "center",
         gap: 2,
         py: 1.5,
       }}
@@ -30,11 +31,7 @@ function NutrientItem({ label, value, unit = "" }) {
   );
 }
 
-function FoodDetails({
-  open,
-  food,
-  onClose,
-}) {
+function FoodDetails({ open, food, onClose }) {
   if (!food) {
     return null;
   }
@@ -125,7 +122,7 @@ function FoodDetails({
             color="text.secondary"
           >
             Valores nutricionais conforme os dados
-            disponibilizados pela API.
+            disponibilizados pela aplicação.
           </Typography>
         </Stack>
       </DialogContent>
