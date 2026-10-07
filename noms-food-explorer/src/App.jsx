@@ -1,122 +1,119 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { searchFoods } from "./services/nomsApi";
 
 function App() {
-  const [count, setCount] = useState(0)
+    // Estados principais da aplicação
+    const [query, setQuery] = useState("");
+    const [foods, setFoods] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [selectedFood, setSelectedFood] = useState(null);
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    // Indica se o usuário já realizou pelo menos uma pesquisa
+    const [hasSearched, setHasSearched] = useState(false);
+
+    async function handleSearch() {
+        if (!query.trim()) {
+            setFoods([]);
+            setError("Digite um alimento para pesquisar.");
+            setHasSearched(false);
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setFoods([]);
+        setSelectedFood(null);
+        setHasSearched(true);
+
+        try {
+            const results = await searchFoods(query.trim());
+
+            setFoods(results);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const showNoResults =
+        hasSearched &&
+        foods.length === 0 &&
+        !loading &&
+        error === null;
+
+    return (
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+            <h1>Noms Food Explorer</h1>
 
-      <div className="ticks"></div>
+            <div>
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Digite um alimento"
+                />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+                <button onClick={handleSearch}>
+                    Pesquisar
+                </button>
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            <hr />
+
+            {/* Estado inicial */}
+            {!hasSearched && !loading && error === null && (
+                <p>Pesquise um alimento para começar.</p>
+            )}
+
+            {/* Loading */}
+            {loading && (
+                <p>Carregando...</p>
+            )}
+
+            {/* Erro */}
+            {error && (
+                <p>{error}</p>
+            )}
+
+            {/* Nenhum resultado */}
+            {showNoResults && (
+                <p>Nenhum alimento encontrado.</p>
+            )}
+
+            {/* Resultados */}
+            {!loading && error === null && foods.length > 0 && (
+                <div>
+                    <p>
+                        Alimentos encontrados: {foods.length}
+                    </p>
+
+                    {foods.map((food) => (
+                        <div key={food.id}>
+                            <p>{food.name}</p>
+
+                            <button
+                                onClick={() => setSelectedFood(food)}
+                            >
+                                Selecionar
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Alimento selecionado */}
+            {selectedFood && (
+                <div>
+                    <hr />
+                    <h2>Alimento selecionado</h2>
+                    <p>{selectedFood.name}</p>
+                    <p>ID: {selectedFood.id}</p>
+                </div>
+            )}
+        </div>
+    );
 }
 
-export default App
+export default App;
