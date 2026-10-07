@@ -5,6 +5,7 @@ const API_KEY = import.meta.env.VITE_NOMS_API_KEY;
 export async function searchFoods(query) {
     const params = new URLSearchParams({
         q: query,
+        include: "brand,nutrients,serving_sizes,images",
     });
 
     const response = await fetch(
@@ -20,16 +21,21 @@ export async function searchFoods(query) {
     console.log("Status HTTP:", response.status);
 
     if (!response.ok) {
-    const errorBody = await response.json().catch(() => null);
+        const errorBody = await response.json().catch(() => null);
 
-    console.error("Erro retornado pela Noms:", errorBody);
+        console.error("Erro retornado pela Noms:", errorBody);
 
-    throw new Error(
-        errorBody?.detail || "Não foi possível consultar a Noms API."
-    );
-}
+        throw new Error(
+            errorBody?.detail || "Não foi possível consultar os alimentos."
+        );
+    }
 
     const result = await response.json();
+
+    console.log("JSON bruto da Noms:", result);
+    console.log("Data:", result.data);
+    console.log("Quantidade:", result.data?.length);
+    console.log("Primeiro alimento:", result.data?.[0]);
 
     return result.data;
 }
