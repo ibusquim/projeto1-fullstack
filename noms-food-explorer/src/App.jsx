@@ -9,6 +9,49 @@ import {
 } from "@mui/material";
 
 import SearchBar from "./components/SearchBar";
+import FoodCard from "./components/FoodCard";
+
+const mockFoods = [
+  {
+  id: "1",
+  name: "Banana",
+  brandName: null,
+  calories: null,
+  protein: null,
+  carbohydrates: null,
+  fat: null,
+  fiber: null,
+  servingSize: "100",
+  servingUnit: "g",
+  imageUrl: null,
+},
+  {
+    id: "2",
+    name: "Apple",
+    brandName: null,
+    calories: "52",
+    protein: "0.26",
+    carbohydrates: "13.81",
+    fat: "0.17",
+    fiber: "2.4",
+    servingSize: "100",
+    servingUnit: "g",
+    imageUrl: null,
+  },
+  {
+    id: "3",
+    name: "Peanut Butter",
+    brandName: "Example Brand",
+    calories: "588",
+    protein: "25.1",
+    carbohydrates: "20",
+    fat: "50",
+    fiber: "6",
+    servingSize: "100",
+    servingUnit: "g",
+    imageUrl: null,
+  },
+];
 
 function App() {
   const [query, setQuery] = useState("");
@@ -106,7 +149,7 @@ function App() {
           />
         </Paper>
 
-        <Box
+          <Box
           component="section"
           sx={{
             mt: 5,
@@ -123,30 +166,27 @@ function App() {
 
           <Divider sx={{ mb: 3 }} />
 
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              border: "1px solid #e0e0e0",
-              p: {
-                xs: 3,
-                sm: 5,
-              },
-              textAlign: "center",
-            }}
-          >
-            <Typography
-              variant="h6"
-              gutterBottom
-            >
-              Faça uma pesquisa para começar
-            </Typography>
-
-            <Typography color="text.secondary">
-              Os alimentos encontrados serão exibidos
-              aqui.
-            </Typography>
-          </Paper>
+          <Box
+  sx={{
+    display: "grid",
+    gridTemplateColumns: {
+      xs: "1fr",
+      sm: "repeat(2, 1fr)",
+      md: "repeat(3, 1fr)",
+    },
+    gap: 3,
+  }}
+>
+  {mockFoods.map((food) => (
+    <FoodCard
+      key={food.id}
+      food={food}
+      onSelect={(selectedFood) => {
+        console.log("Alimento selecionado:", selectedFood);
+      }}
+    />
+  ))}
+</Box>
         </Box>
       </Container>
 
