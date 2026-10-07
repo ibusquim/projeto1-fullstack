@@ -1,8 +1,26 @@
 import { useMemo, useState } from "react";
+
+import {
+  Box,
+  Container,
+  Divider,
+  Paper,
+  Typography,
+} from "@mui/material";
+
 import { searchFoods } from "./services/nomsApi";
 
+import SearchBar from "./components/SearchBar";
+import FoodCard from "./components/FoodCard";
+import FoodDetails from "./components/FoodDetails";
+import Loading from "./components/Loading";
+import ErrorMessage from "./components/ErrorMessage";
+
 function App() {
-  // Estados principais da aplicação
+  // ==========================================
+  // ESTADOS PRINCIPAIS DA APLICAÇÃO
+  // ==========================================
+
   const [query, setQuery] = useState("");
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -10,7 +28,10 @@ function App() {
   const [selectedFood, setSelectedFood] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Processamento dos dados retornados pela Noms
+  // ==========================================
+  // PROCESSAMENTO DOS DADOS DA NOMS
+  // ==========================================
+
   const processedFoods = useMemo(() => {
     return foods.map((food) => {
       const defaultServing = food.serving_sizes?.find(
@@ -21,9 +42,12 @@ function App() {
 
       return {
         id: food.id,
-        name: food.name?.trim() || "Alimento sem nome",
+        name:
+          food.name?.trim() || "Alimento sem nome",
 
-        brand: food.brand?.name?.trim() || "Marca não informada",
+        brand:
+          food.brand?.name?.trim() ||
+          "Marca não informada",
 
         nutrients: food.nutrients ?? [],
 
@@ -35,14 +59,27 @@ function App() {
 
         basisUnit: food.basis_unit ?? null,
 
-        description: food.description?.trim() || null,
+        description:
+          food.description?.trim() || null,
       };
     });
   }, [foods]);
 
+  // ==========================================
+  // SELEÇÃO DO ALIMENTO
+  // ==========================================
+
   function handleSelectFood(food) {
     setSelectedFood(food);
   }
+
+  function handleCloseDetails() {
+    setSelectedFood(null);
+  }
+
+  // ==========================================
+  // PESQUISA
+  // ==========================================
 
   async function handleSearch() {
     if (!query.trim()) {
@@ -50,6 +87,7 @@ function App() {
       setError("Digite um alimento para pesquisar.");
       setSelectedFood(null);
       setHasSearched(false);
+
       return;
     }
 
@@ -64,132 +102,323 @@ function App() {
 
       setFoods(results);
     } catch (err) {
-      setError(err.message);
+      setError(
+        err?.message ||
+          "Não foi possível consultar os alimentos."
+      );
     } finally {
       setLoading(false);
     }
   }
 
+  // ==========================================
+  // ESTADO: NENHUM RESULTADO
+  // ==========================================
+
   const showNoResults =
     hasSearched &&
-    foods.length === 0 &&
     !loading &&
-    error === null;
+    error === null &&
+    processedFoods.length === 0;
+
+  // ==========================================
+  // INTERFACE
+  // ==========================================
 
   return (
-    <div>
-      <h1>Noms Food Explorer</h1>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "#f5f7fa",
+      }}
+    >
+      {/* ======================================
+          CABEÇALHO
+          ====================================== */}
 
-      <div>
-        <input
-          type="text"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Digite um alimento"
-        />
+      <Box
+        component="header"
+        sx={{
+          backgroundColor: "#ffffff",
+          borderBottom: "1px solid #e0e0e0",
+        }}
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            py: {
+              xs: 3,
+              sm: 4,
+            },
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h1"
+            fontWeight={800}
+            align="center"
+            gutterBottom
+            sx={{
+              fontSize: {
+                xs: "2rem",
+                sm: "2.5rem",
+                md: "3rem",
+              },
+            }}
+          >
+            Noms Food Explorer
+          </Typography>
 
-        <button onClick={handleSearch}>
-          Pesquisar
-        </button>
-      </div>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            align="center"
+            sx={{
+              maxWidth: 700,
+              mx: "auto",
+            }}
+          >
+            Pesquise alimentos e consulte suas
+            informações nutricionais.
+          </Typography>
+        </Container>
+      </Box>
 
-      <hr />
+      {/* ======================================
+          CONTEÚDO PRINCIPAL
+          ====================================== */}
 
-      {/* Estado inicial */}
-      {!hasSearched && !loading && error === null && (
-        <p>Pesquise um alimento para começar.</p>
-      )}
+      <Container
+        maxWidth="lg"
+        component="main"
+        sx={{
+          py: {
+            xs: 3,
+            sm: 5,
+          },
+        }}
+      >
+        {/* ====================================
+            ÁREA DE PESQUISA
+            ==================================== */}
 
-      {/* Loading */}
-      {loading && (
-        <p>Carregando...</p>
-      )}
+        <Paper
+          elevation={0}
+          sx={{
+            p: {
+              xs: 2,
+              sm: 4,
+            },
+            borderRadius: 3,
+            border: "1px solid #e0e0e0",
+          }}
+        >
+          <Typography
+            variant="h5"
+            component="h2"
+            fontWeight={700}
+            gutterBottom
+          >
+            Pesquisar alimento
+          </Typography>
 
-      {/* Erro */}
-      {error && (
-        <p>{error}</p>
-      )}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: 3,
+            }}
+          >
+            Digite o nome de um alimento para consultar
+            suas informações.
+          </Typography>
 
-      {/* Nenhum resultado */}
-      {showNoResults && (
-        <p>Nenhum alimento encontrado.</p>
-      )}
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            onSearch={handleSearch}
+            loading={loading}
+          />
+        </Paper>
 
-      {/* Resultados */}
-      {!loading && error === null && processedFoods.length > 0 && (
-        <div>
-          <p>
-            Alimentos encontrados: {processedFoods.length}
-          </p>
+        {/* ====================================
+            RESULTADOS
+            ==================================== */}
 
-          {processedFoods.map((food) => (
-            <div key={food.id}>
-              <h2>{food.name}</h2>
+        <Box
+          component="section"
+          sx={{
+            mt: {
+              xs: 4,
+              sm: 5,
+            },
+          }}
+        >
+          <Typography
+            variant="h5"
+            component="h2"
+            fontWeight={700}
+            gutterBottom
+          >
+            Resultados
+          </Typography>
 
-              <p>
-                Marca: {food.brand}
-              </p>
+          <Divider sx={{ mb: 3 }} />
 
-              <p>
-                Código de barras:{" "}
-                {food.barcode || "Não informado"}
-              </p>
+          {/* ==================================
+              ESTADO INICIAL
+              ================================== */}
 
-              <p>
-                Unidade base:{" "}
-                {food.basisUnit || "Não informada"}
-              </p>
-
-              <p>
-                Nutrientes encontrados:{" "}
-                {food.nutrients.length}
-              </p>
-
-              {food.serving && (
-                <p>
-                  Porção padrão:{" "}
-                  {food.serving.quantity}{" "}
-                  {food.serving.unit}
-                </p>
-              )}
-
-              {food.imageUrl && (
-                <p>
-                  Imagem encontrada: sim
-                </p>
-              )}
-
-              <button
-                onClick={() => handleSelectFood(food)}
+          {!hasSearched &&
+            !loading &&
+            error === null && (
+              <Paper
+                elevation={0}
+                sx={{
+                  borderRadius: 3,
+                  border: "1px solid #e0e0e0",
+                  p: {
+                    xs: 3,
+                    sm: 5,
+                  },
+                  textAlign: "center",
+                }}
               >
-                Selecionar
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                >
+                  Pesquise um alimento para começar
+                </Typography>
 
-      {/* Alimento selecionado */}
-      {selectedFood && (
-        <div>
-          <hr />
+                <Typography color="text.secondary">
+                  Os alimentos encontrados serão exibidos
+                  aqui.
+                </Typography>
+              </Paper>
+            )}
 
-          <h2>Alimento selecionado</h2>
+          {/* ==================================
+              LOADING
+              ================================== */}
 
-          <p>
-            Nome: {selectedFood.name}
-          </p>
+          {loading && <Loading />}
 
-          <p>
-            Marca: {selectedFood.brand}
-          </p>
+          {/* ==================================
+              ERRO
+              ================================== */}
 
-          <p>
-            ID: {selectedFood.id}
-          </p>
-        </div>
-      )}
-    </div>
+          {!loading && error && (
+            <ErrorMessage message={error} />
+          )}
+
+          {/* ==================================
+              NENHUM RESULTADO
+              ================================== */}
+
+          {showNoResults && (
+            <Paper
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                border: "1px solid #e0e0e0",
+                p: {
+                  xs: 3,
+                  sm: 5,
+                },
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="h6"
+                gutterBottom
+              >
+                Nenhum alimento encontrado.
+              </Typography>
+
+              <Typography color="text.secondary">
+                Tente realizar outra pesquisa.
+              </Typography>
+            </Paper>
+          )}
+
+          {/* ==================================
+              RESULTADOS REAIS
+              ================================== */}
+
+          {!loading &&
+            error === null &&
+            processedFoods.length > 0 && (
+              <>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    mb: 3,
+                  }}
+                >
+                  Alimentos encontrados:{" "}
+                  {processedFoods.length}
+                </Typography>
+
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(2, 1fr)",
+                      md: "repeat(3, 1fr)",
+                    },
+                    gap: 3,
+                  }}
+                >
+                  {processedFoods.map((food) => (
+                    <FoodCard
+                      key={food.id}
+                      food={food}
+                      onSelect={handleSelectFood}
+                    />
+                  ))}
+                </Box>
+              </>
+            )}
+        </Box>
+      </Container>
+
+      {/* ======================================
+          DIALOG DE DETALHES
+          ====================================== */}
+
+      <FoodDetails
+        open={Boolean(selectedFood)}
+        food={selectedFood}
+        onClose={handleCloseDetails}
+      />
+
+      {/* ======================================
+          RODAPÉ
+          ====================================== */}
+
+      <Box
+        component="footer"
+        sx={{
+          mt: 6,
+          py: 3,
+          backgroundColor: "#ffffff",
+          borderTop: "1px solid #e0e0e0",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            align="center"
+          >
+            Noms Food Explorer — Projeto 1 Fullstack
+          </Typography>
+        </Container>
+      </Box>
+    </Box>
   );
 }
 

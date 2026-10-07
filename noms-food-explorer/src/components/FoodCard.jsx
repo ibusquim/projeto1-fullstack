@@ -10,6 +10,18 @@ import {
 } from "@mui/material";
 
 function FoodCard({ food, onSelect }) {
+  const nutrients = Array.isArray(food.nutrients)
+    ? food.nutrients
+    : [];
+
+  const visibleNutrients = nutrients.slice(0, 3);
+
+  const servingText = food.serving
+    ? `${food.serving.quantity ?? ""} ${
+        food.serving.unit ?? ""
+      }`.trim()
+    : null;
+
   return (
     <Card
       sx={{
@@ -51,7 +63,17 @@ function FoodCard({ food, onSelect }) {
           {food.name}
         </Typography>
 
-        {food.brandName && (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mb: 2,
+          }}
+        >
+          {food.brand}
+        </Typography>
+
+        {servingText && (
           <Typography
             variant="body2"
             color="text.secondary"
@@ -59,7 +81,7 @@ function FoodCard({ food, onSelect }) {
               mb: 2,
             }}
           >
-            {food.brandName}
+            Porção: {servingText}
           </Typography>
         )}
 
@@ -69,20 +91,19 @@ function FoodCard({ food, onSelect }) {
           useFlexGap
           flexWrap="wrap"
         >
-          <Chip
-            label={`${food.calories ?? "—"} kcal`}
-            size="small"
-          />
-
-          <Chip
-            label={`${food.protein ?? "—"} g proteína`}
-            size="small"
-          />
-
-          <Chip
-            label={`${food.carbohydrates ?? "—"} g carboidratos`}
-            size="small"
-          />
+          {visibleNutrients.map((nutrient) => (
+            <Chip
+              key={nutrient.id}
+              label={`${nutrient.name}: ${
+                nutrient.value ?? "—"
+              }${
+                nutrient.unit
+                  ? ` ${nutrient.unit}`
+                  : ""
+              }`}
+              size="small"
+            />
+          ))}
         </Stack>
       </CardContent>
 
