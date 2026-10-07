@@ -62,6 +62,7 @@ A aplicação utiliza uma chave da Noms API.
 
 ```env
 VITE_NOMS_API_KEY=sua_chave
+```
 
 ## Funcionalidades
 
