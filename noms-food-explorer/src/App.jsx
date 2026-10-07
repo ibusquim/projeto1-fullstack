@@ -10,6 +10,7 @@ import {
 
 import SearchBar from "./components/SearchBar";
 import FoodCard from "./components/FoodCard";
+import FoodDetails from "./components/FoodDetails";
 
 const mockFoods = [
   {
@@ -55,6 +56,15 @@ const mockFoods = [
 
 function App() {
   const [query, setQuery] = useState("");
+  const [selectedFood, setSelectedFood] = useState(null);
+
+  function handleSelectFood(food) {
+  setSelectedFood(food);
+}
+
+function handleCloseDetails() {
+  setSelectedFood(null);
+}
 
   function handleSearch() {
     console.log("Pesquisa:", query);
@@ -179,14 +189,18 @@ function App() {
 >
   {mockFoods.map((food) => (
     <FoodCard
-      key={food.id}
-      food={food}
-      onSelect={(selectedFood) => {
-        console.log("Alimento selecionado:", selectedFood);
-      }}
-    />
+  key={food.id}
+  food={food}
+  onSelect={handleSelectFood}
+/>
   ))}
 </Box>
+
+<FoodDetails
+  open={Boolean(selectedFood)}
+  food={selectedFood}
+  onClose={handleCloseDetails}
+/>
         </Box>
       </Container>
 
