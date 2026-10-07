@@ -1,6 +1,6 @@
 # Noms Food Explorer
 
-Aplicação web desenvolvida em **React.js** para pesquisa de alimentos utilizando a **Noms API**, com exibição dos resultados e preparação dos dados para consulta de informações nutricionais.
+Aplicação web desenvolvida em **React.js** para pesquisa de alimentos utilizando a **Noms API**, com exibição dos resultados e visualização de informações relacionadas aos alimentos.
 
 O projeto funciona como uma **Single Page Application (SPA)**, sem redirecionamento entre páginas durante o uso.
 
@@ -30,14 +30,14 @@ A comunicação com a API é realizada de forma assíncrona utilizando **Fetch A
 
 ## Tecnologias
 
-- React.js
-- JavaScript
-- Fetch API/AJAX
-- Noms API
-- Material UI
-- `useMemo`
-- Git
-- GitHub
+* React.js
+* JavaScript
+* Fetch API/AJAX
+* Noms API
+* Material UI
+* `useMemo`
+* Git
+* GitHub
 
 ## Como executar
 
@@ -64,25 +64,36 @@ A aplicação utiliza uma chave da Noms API.
 VITE_NOMS_API_KEY=sua_chave
 ```
 
+O arquivo `.env` não deve ser enviado ao GitHub.
+
+Para facilitar a configuração do projeto, é disponibilizado o arquivo `.env.example`:
+
+```env
+VITE_NOMS_API_KEY=
+```
+
+Cada integrante deve configurar seu próprio arquivo `.env` localmente.
+
 ## Funcionalidades
 
-Atualmente, o projeto possui ou está estruturado para:
+O projeto possui a estrutura necessária para:
 
-- pesquisa de alimentos;
-- consulta à Noms API;
-- recebimento e processamento de dados JSON;
-- exibição dos resultados da pesquisa;
-- estado de carregamento;
-- tratamento de erros;
-- tratamento de pesquisa sem resultados;
-- seleção de alimento;
-- preparação dos dados para exibição de informações nutricionais;
-- utilização do `useMemo` para processamento de dados;
-- interface em uma única página (SPA).
+* pesquisa de alimentos;
+* consulta à Noms API;
+* recebimento e processamento de dados JSON;
+* exibição dos resultados em cards;
+* estado de carregamento;
+* tratamento de erros;
+* tratamento de pesquisa sem resultados;
+* seleção de alimento;
+* visualização de informações nutricionais;
+* utilização do `useMemo` para processamento dos dados;
+* interface responsiva;
+* funcionamento como SPA.
 
 ## Arquitetura
 
-A aplicação possui o `App.jsx` como principal coordenador da lógica da interface.
+O `App.jsx` funciona como principal coordenador entre a lógica da aplicação e os componentes visuais.
 
 Estrutura principal:
 
@@ -103,7 +114,7 @@ src/
 └── index.css
 ```
 
-Fluxo dos dados:
+### Fluxo dos dados
 
 ```text
                  ┌───────────────┐
@@ -128,148 +139,375 @@ Fluxo dos dados:
                  └───────┬───────┘
                          │
                          ▼
-                    dados JSON
+                       foods
                          │
                          ▼
-                    processamento
+                      useMemo
                          │
                          ▼
-              componentes visuais
+                  processedFoods
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+          FoodCard    Loading    ErrorMessage
+              │
+              ▼
+        selectedFood
+              │
+              ▼
+      FoodDetails / Dialog
 ```
 
-O `useMemo` é utilizado para gerar dados processados a partir dos resultados recebidos da API.
+### Processamento dos dados
 
-## Divisão da equipe
+Os resultados brutos retornados pela Noms são armazenados em `foods`.
 
-### Integrantes
+A partir de `foods`, o `App.jsx` utiliza `useMemo` para gerar o valor derivado `processedFoods`.
 
-- Rafael Spitzer Cardoso da Silva — A2612534
-- Igor Busquim de Moraes — A2565382
+Cada alimento processado possui a estrutura:
 
-A divisão de responsabilidades do projeto foi organizada entre **dados e lógica** e **interface e componentes visuais**.
+```javascript
+{
+  id,
+  name,
+  brand,
+  nutrients,
+  serving,
+  imageUrl,
+  barcode,
+  basisUnit,
+  description
+}
+```
 
-### Dados e lógica
+A estrutura de `nutrients` é:
 
-Responsabilidades relacionadas a:
+```javascript
+{
+  id,
+  name,
+  value,
+  unit
+}
+```
 
-- Noms API;
-- Fetch/AJAX;
-- pesquisa;
-- estados da aplicação;
-- loading;
-- tratamento de erros;
-- processamento dos dados;
-- `useMemo`;
-- seleção de alimento.
+O campo `serving` representa a porção padrão selecionada a partir das porções disponíveis:
 
-### Interface
+```javascript
+{
+  unit,
+  descriptor,
+  quantity,
+  grams,
+  milliliters,
+  is_default
+}
+```
 
-Responsabilidades relacionadas a:
+Os componentes visuais recebem os dados já processados pelo `App.jsx` e não precisam acessar diretamente a estrutura bruta da resposta da Noms.
 
-- Material UI;
-- layout;
-- componentes React;
-- campo de pesquisa;
-- cards de alimentos;
-- detalhes do alimento;
-- Dialog;
-- Loading;
-- mensagens de erro;
-- responsividade.
+## Estados da aplicação
+
+O `App.jsx` controla os seguintes estados:
+
+```javascript
+query
+foods
+loading
+error
+selectedFood
+hasSearched
+```
+
+### `query`
+
+Texto digitado pelo usuário para realizar a pesquisa.
+
+### `foods`
+
+Resultados brutos retornados pela função `searchFoods()`.
+
+### `loading`
+
+Indica que uma pesquisa está sendo realizada.
+
+### `error`
+
+Contém a mensagem de erro quando ocorre uma falha.
+
+### `selectedFood`
+
+Armazena o alimento selecionado pelo usuário.
+
+Quando nenhum alimento está selecionado:
+
+```javascript
+selectedFood === null
+```
+
+### `hasSearched`
+
+Indica se o usuário já realizou uma pesquisa e permite diferenciar o estado inicial de uma pesquisa que não retornou resultados.
+
+### `processedFoods`
+
+`processedFoods` não é um estado independente. É um valor derivado de `foods`, calculado utilizando `useMemo`.
 
 ## Contrato entre os integrantes
 
 O `App.jsx` funciona como coordenador da integração entre a lógica e os componentes visuais.
 
-Os principais dados controlados são:
+### SearchBar
 
-```text
-query
-foods
-processedFoods
-loading
-error
-selectedFood
+```jsx
+<SearchBar
+  value={query}
+  onChange={setQuery}
+  onSearch={handleSearch}
+/>
 ```
 
-Os principais componentes foram planejados para receber:
+Props:
+
+* `value`: valor atual da pesquisa;
+* `onChange`: função responsável por atualizar a pesquisa;
+* `onSearch`: função responsável por iniciar a pesquisa.
+
+A lógica da comunicação com a API permanece no `App.jsx`.
+
+### FoodCard
+
+```jsx
+<FoodCard
+  food={food}
+  onSelect={handleSelectFood}
+/>
+```
+
+Props:
+
+* `food`: alimento processado a partir de `processedFoods`;
+* `onSelect`: função responsável pela seleção do alimento.
+
+O `FoodCard` não acessa diretamente a resposta bruta da Noms.
+
+### Loading
+
+```jsx
+{loading && <Loading />}
+```
+
+O `Loading` é apresentado quando `loading` é `true`.
+
+O componente visual não controla a requisição.
+
+### ErrorMessage
+
+```jsx
+<ErrorMessage
+  message={error}
+/>
+```
+
+A lógica de tratamento do erro permanece no `App.jsx`.
+
+### FoodDetails
+
+O componente recebe o alimento selecionado e também participa do controle visual do Dialog:
+
+```jsx
+<FoodDetails
+  open={Boolean(selectedFood)}
+  food={selectedFood}
+  onClose={handleCloseDetails}
+/>
+```
+
+Props:
+
+* `open`: indica se o Dialog deve estar aberto;
+* `food`: alimento selecionado;
+* `onClose`: função responsável pelo fechamento.
+
+## Fluxo de integração
+
+O fluxo principal entre lógica e interface é:
 
 ```text
+Usuário digita
+      ↓
 SearchBar
-├── value
-├── onChange
-└── onSearch
-
+      ↓
+query
+      ↓
+handleSearch()
+      ↓
+searchFoods()
+      ↓
+Noms API
+      ↓
+foods
+      ↓
+useMemo
+      ↓
+processedFoods
+      ↓
 FoodCard
-├── food
-└── onSelect
-
-Loading
-└── estado de loading
-
-ErrorMessage
-└── message
-
+      ↓
+onSelect(food)
+      ↓
+handleSelectFood()
+      ↓
+selectedFood
+      ↓
 FoodDetails
-└── food
+      ↓
+Dialog
 ```
 
-A lógica de comunicação com a Noms permanece separada dos componentes visuais.
+## Estados visuais
 
-## Ferramentas de apoio
+A interface diferencia os principais estados da aplicação.
 
-Durante o desenvolvimento foi utilizado **ChatGPT** como ferramenta de apoio para:
-
-- planejamento da arquitetura;
-- organização das etapas de desenvolvimento;
-- análise da estrutura da API;
-- apoio na implementação da lógica React;
-- revisão de código;
-- organização da documentação do projeto.
-
-O desenvolvimento e versionamento do projeto também utilizam **Git e GitHub**.
-
-## Como executar os testes
-
-Os testes realizados até o momento são testes manuais utilizando a aplicação, o navegador e o Console do DevTools.
-
-### Teste de pesquisa
-
-Realizar uma pesquisa utilizando:
+### Estado inicial
 
 ```text
-apple
+hasSearched = false
+loading = false
+error = null
+foods = []
 ```
 
-Resultado esperado:
+Nesse estado, a aplicação apresenta uma mensagem orientando o usuário a realizar uma pesquisa.
 
-```text
-Status HTTP: 200
-```
-
-A API retornou resultados e foi possível verificar a quantidade de alimentos recebidos.
-
-### Teste de quantidade de resultados
-
-Na pesquisa realizada com `apple`, a API retornou:
-
-```text
-10 alimentos
-```
-
-Também foi verificado o primeiro objeto retornado pela API para identificar sua estrutura real.
-
-### Teste de loading
-
-Ao realizar uma pesquisa:
+### Carregando
 
 ```text
 loading = true
 ```
 
-Durante o processamento da requisição.
+A interface apresenta o componente `Loading`.
 
-Após a resposta:
+### Resultados
+
+```text
+loading = false
+error = null
+processedFoods.length > 0
+```
+
+Os resultados são apresentados utilizando `FoodCard`.
+
+### Nenhum resultado
+
+```text
+hasSearched = true
+loading = false
+error = null
+processedFoods.length === 0
+```
+
+A interface apresenta uma mensagem informando que nenhum alimento foi encontrado.
+
+### Erro
+
+```text
+error !== null
+loading = false
+```
+
+A interface apresenta o componente `ErrorMessage`.
+
+## Divisão da equipe
+
+### Integrantes
+
+* Rafael Spitzer Cardoso da Silva — A2612534
+* Igor Busquim de Moraes — A2565382
+
+A divisão de responsabilidades foi organizada entre **dados e lógica** e **interface e componentes visuais**.
+
+### Dados e lógica
+
+Responsabilidades relacionadas a:
+
+* Noms API;
+* Fetch/AJAX;
+* pesquisa;
+* estados da aplicação;
+* loading;
+* tratamento de erros;
+* processamento dos dados;
+* `useMemo`;
+* seleção do alimento.
+
+### Interface
+
+Responsabilidades relacionadas a:
+
+* Material UI;
+* layout;
+* componentes React;
+* campo de pesquisa;
+* cards de alimentos;
+* detalhes do alimento;
+* Dialog;
+* Loading;
+* mensagens de erro;
+* responsividade.
+
+## Ferramentas de apoio
+
+Durante o desenvolvimento foi utilizado **ChatGPT** como ferramenta de apoio para:
+
+* planejamento da arquitetura;
+* organização das etapas de desenvolvimento;
+* análise da estrutura da API;
+* apoio na implementação da lógica React;
+* revisão de código;
+* organização da documentação do projeto.
+
+O desenvolvimento e versionamento do projeto também utilizam **Git e GitHub**.
+
+## Testes realizados
+
+Os testes realizados até o momento são testes manuais utilizando a aplicação, o navegador e o Console/Network do DevTools.
+
+### Teste de pesquisa
+
+Foi realizada uma pesquisa utilizando:
+
+```text
+apple
+```
+
+Durante esse teste, foi verificado o recebimento de uma resposta HTTP de sucesso:
+
+```text
+Status HTTP: 200
+```
+
+Também foi analisado o primeiro objeto retornado pela API para verificar a estrutura real dos dados utilizados pela aplicação.
+
+### Teste de quantidade de resultados
+
+Na execução do teste com a pesquisa `apple`, a API retornou:
+
+```text
+10 alimentos
+```
+
+Esse valor corresponde ao resultado obtido durante essa execução do teste.
+
+### Teste de loading
+
+Durante uma pesquisa, o estado é alterado para:
+
+```text
+loading = true
+```
+
+Após a conclusão da requisição:
 
 ```text
 loading = false
@@ -279,32 +517,58 @@ loading = false
 
 Foi verificado o tratamento de respostas HTTP diferentes de sucesso.
 
-Durante a integração, uma resposta:
+Durante os testes, uma resposta:
 
 ```text
 HTTP 403
 ```
 
-foi corretamente identificada como erro pela aplicação.
+foi identificada como erro pela aplicação.
 
 ### Teste de seleção
 
 Após o recebimento dos resultados, um alimento pode ser selecionado e armazenado em:
 
-```javascript
+```text
 selectedFood
 ```
 
 O estado inicial é:
 
-```javascript
+```text
 selectedFood = null
 ```
 
-## Integrantes
+### Testes visuais
 
-**Rafael Spitzer Cardoso da Silva**  
-RA: A2612534
+A interface também foi testada em diferentes tamanhos de tela:
 
-**Igor Busquim de Moraes**  
-RA: A2565382
+```text
+390 × 844
+768 × 1024
+1024 × 768
+1440 × 900
+```
+
+Foram verificados:
+
+* título;
+* campo de pesquisa;
+* cards;
+* Dialog de detalhes;
+* espaçamentos;
+* comportamento responsivo.
+
+## Git e GitHub
+
+O projeto utiliza Git e GitHub para versionamento e acompanhamento do desenvolvimento.
+
+As alterações são organizadas em branches e Pull Requests, permitindo registrar a participação individual de cada integrante.
+
+Cada integrante é responsável por uma parte definida da aplicação, conforme a divisão apresentada neste documento.
+
+## Estado do projeto
+
+A aplicação possui a estrutura da API, lógica de processamento e componentes visuais definidos para a integração.
+
+A integração entre os dados processados pela Noms e os componentes visuais é realizada através do `App.jsx`, mantendo a separação de responsabilidades entre os integrantes.
